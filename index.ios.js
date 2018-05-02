@@ -7,6 +7,7 @@ var {
 
 var {
   View,
+  ViewPropTypes,
   StyleSheet,
   NativeModules,
   requireNativeComponent,
@@ -22,7 +23,7 @@ var FBLogin = React.createClass({
   },
 
   propTypes: {
-    style: View.propTypes.style,
+    style: ViewPropTypes.style,
     permissions: PropTypes.array, // default: ["public_profile", "email"]
     loginBehavior: PropTypes.number, // default: Native
     onLogin: PropTypes.func,
