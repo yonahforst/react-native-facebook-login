@@ -1,5 +1,5 @@
-#import "RCTViewManager.h"
+#import <React/RCTViewManager.h>
 
-@interface RCTFBLoginManager : RCTViewManager <FBSDKLoginButtonDelegate>
+@interface RCTMFBLoginManager : RCTViewManager <FBSDKLoginButtonDelegate>
 
 @end

@@ -1,23 +1,26 @@
 'use strict';
 var React = require('react');
 var ReactNative = require('react-native');
+var PropTypes = require('prop-types');
 
 var {
   StyleSheet,
   Text,
   Image,
   View,
+  ViewPropTypes,
   TouchableHighlight,
 } = ReactNative;
 
 var FBLoginManager = require('NativeModules').FBLoginManager;
+const viewPropTypes = ViewPropTypes || View.propTypes;
 
 var FBLoginMock = React.createClass({
   propTypes: {
-    style: View.propTypes.style,
-    onPress: React.PropTypes.func,
-    onLogin: React.PropTypes.func,
-    onLogout: React.PropTypes.func,
+    style: viewPropTypes.style,
+    onPress: PropTypes.func,
+    onLogin: PropTypes.func,
+    onLogout: PropTypes.func,
   },
 
   getInitialState: function(){

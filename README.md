@@ -1,4 +1,4 @@
-# React Native : Facebook SDK Login Button
+# React Native : Facebook SDK Login Button [![npm version](https://img.shields.io/npm/v/react-native-facebook-login.svg?style=flat)](https://www.npmjs.com/package/react-native-facebook-login)
 `<FBLogin />` provides a [React Native][react-native] component wrapping the native [Facebook SDK login button](https://developers.facebook.com/docs/reference/ios/current/class/FBSDKLoginButton/) and [manager](https://developers.facebook.com/docs/reference/ios/current/class/FBSDKLoginManager/).
 
 
@@ -21,26 +21,31 @@ Provides a React Native component which wraps the Facebook SDK `FBSDKLoginButton
 
 ##### Defaults
 ```js
-var {FBLogin, FBLoginManager} = require('react-native-facebook-login');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+var { FBLogin, FBLoginManager } = require('react-native-facebook-login');
 
-var Login = React.createClass({
-  render: function() {
+class Login extends Component {
+  render() {
     return (
       <FBLogin />
     );
   }
-});
+};
 ```
 
 ##### Exhaustive
 ```js
-var {FBLogin, FBLoginManager} = require('react-native-facebook-login');
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+var { FBLogin, FBLoginManager } = require('react-native-facebook-login');
 
-var Login = React.createClass({
-  render: function() {
+class Login extends Component {
+  render() {
     var _this = this;
     return (
       <FBLogin style={{ marginBottom: 10, }}
+        ref={(fbLogin) => { this.fbLogin = fbLogin }}
         permissions={["email","user_friends"]}
         loginBehavior={FBLoginManager.LoginBehaviors.Native}
         onLogin={function(data){
@@ -75,7 +80,7 @@ var Login = React.createClass({
       />
     );
   }
-});
+};
 ```
 
 #### Login Behavior
@@ -95,11 +100,13 @@ See [example/components/facebook/FBLoginMock.js](example/components/facebook/FBL
 ```js
 var {FBLoginManager} = require('react-native-facebook-login');
 
+FBLoginManager.setLoginBehavior(FBLoginManager.LoginBehaviors.Web); // defaults to Native
+
 FBLoginManager.loginWithPermissions(["email","user_friends"], function(error, data){
   if (!error) {
     console.log("Login data: ", data);
   } else {
-    console.log("Error: ", data);
+    console.log("Error: ", error);
   }
 })
 ```
@@ -137,7 +144,7 @@ subscriber.remove();
 npm install --save react-native-facebook-login
 ```
 - Run ```open node_modules/react-native-facebook-login```
-- Drag `RCTFBLogin.xcodeproj` into your `Libraries` group
+- Have your react native xcode project open and drag `RCTFBLogin.xcodeproj` into your `Libraries` group.
 - Select your main project in the navigator to bring up settings
 - Under `Build Phases` expand the `Link Binary With Libraries` header
 - Scroll down and click the `+` to add a library
@@ -147,7 +154,7 @@ npm install --save react-native-facebook-login
 **Note**: If your build fails, you most likely forgot to setup the [Facebook SDK](#facebook-sdk)
 
 #### Facebook SDK
-[Facebook : Quick Start for iOS](https://developers.facebook.com/quickstarts/?platform=ios)
+[Facebook : Quick Start for iOS](https://developers.facebook.com/docs/facebook-login/ios)
 
 Be sure to [configure your .plist file](https://developers.facebook.com/docs/ios/getting-started#xcode). This file is located under the `ios/<project-name>` directory of your generated react-native project. It should be in the same folder as your `AppDelegate.m` file.
 
@@ -167,7 +174,8 @@ As of iOS 9 you must now explicitly whitelist requests your application makes in
 
 ##### Adding the Facebook SDK
 - Run `open node_modules/react-native-facebook-login/FacebookSDK`
-- Select all the `.framework` files and click drag them into your project
+- Open your main project in xcode and right click on your project’s name in the left sidebar and select “New Group” and type in “Frameworks”.
+- Select all the `.framework` files in the FacebookSDK folder and click drag them into the Frameworks folder/group you just created in xcode or highlight the Frameworks group in left sidebar and go to File > Add files to "yourProjectName" and select the `.framework` files.
 - Select your main project in the navigator to bring up settings
 - Under `Build Settings` scroll down to `Search Paths`
 - Add the following path to your `Framework Search Paths`

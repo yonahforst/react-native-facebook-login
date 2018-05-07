@@ -1,7 +1,7 @@
 # Android Setup: react-native-facebook-login
 
 **Assumptions**
-- You have a facebook app setup (Key Hash, App Id, etc)
+- You have a [Facebook App Setup](https://developers.facebook.com/quickstarts/?platform=android) (Key Hash, App Id, etc)
 - You installed this module via npm
 
 #### Step 1 - Update Gradle Settings
@@ -26,13 +26,14 @@ dependencies {
 }
 ```
 
-#### Step 3 - Register React Package and Handle onActivityResult
+#### Step 3 - Register React Package 
 
 ```java
+//file: android/app/src/main/java/com/{Your Package Name}/MainApplication.java
 ...
 import com.magus.fblogin.FacebookLoginPackage; // <--- import
 
-public class MainActivity extends ReactActivity {
+public class MainApplication extends Application implements ReactApplication {
 
     ...
 
@@ -51,16 +52,20 @@ public class MainActivity extends ReactActivity {
 #### Step 4 - Add Facebook App ID to String resources
 
 ```xml
+ <!-- file: android/app/src/main/res/values/strings.xml -->
 <resources>
-    <string name="app_name">your-app-name</string>
-    <string name="fb_app_id">your-fb-app-id</string>
+    <string name="app_name">{Your_App_Name}</string>
+    <string name="fb_app_id">{FB_APP_ID}</string>
+    <string name="fb_login_protocol_scheme">fb{FB_APP_ID}</string>
 </resources>
 ```
 
 #### Step 5 - update AndroidManifest
 
 ```xml
+ <!-- file: android/app/src/main/AndroidManifest.xml -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="com.your.app.namespace">
 
     ...
@@ -73,11 +78,23 @@ public class MainActivity extends ReactActivity {
         ...
 
         <!--add FacebookActivity-->
-        <activity
+        <activity tools:replace="android:theme"
                 android:name="com.facebook.FacebookActivity"
                 android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
                 android:label="@string/app_name"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+
+        <!--add CustomTabActivity-->
+        <activity
+            android:name="com.facebook.CustomTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/fb_login_protocol_scheme" />
+            </intent-filter>
+        </activity>
 
         <!--reference your fb_app_id-->
         <meta-data
@@ -92,7 +109,7 @@ public class MainActivity extends ReactActivity {
 #### Step 6 - include in Javascript
 
 ```js
-var {FBLogin, FBLoginManager} = require('react-native-facebook-login');
+import {FBLogin, FBLoginManager} from 'react-native-facebook-login';
 
 /**
   eg.
@@ -102,6 +119,7 @@ var {FBLogin, FBLoginManager} = require('react-native-facebook-login');
 **/
 <FBLogin
     buttonView={<FBLoginView />}
+    ref={(fbLogin) => { this.fbLogin = fbLogin }}
     loginBehavior={FBLoginManager.LoginBehaviors.Native}
     permissions={["email","user_friends"]}
     onLogin={function(e){console.log(e)}}
@@ -115,8 +133,9 @@ var {FBLogin, FBLoginManager} = require('react-native-facebook-login');
 
 eg. FBLoginView class
 ```js
-var React = require('react-native');
-var {View, Text, StyleSheet} = React;
+import React, { Component } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import PropTypes from 'prop-types';
 var Icon = require('react-native-vector-icons/FontAwesome');
 
 /**
@@ -125,12 +144,12 @@ var Icon = require('react-native-vector-icons/FontAwesome');
   - this is not meant to be a full example but highlights what you have access to
   - If you use a touchable component, you will need to set the onPress event like below
 **/
-class FBLoginView extends React.Component {
+class FBLoginView extends Component {
   static contextTypes = {
-    isLoggedIn: React.PropTypes.bool,
-    login: React.PropTypes.func,
-    logout: React.PropTypes.func,
-    props: React.PropTypes.object
+    isLoggedIn: PropTypes.bool,
+    login: PropTypes.func,
+    logout: PropTypes.func,
+    props: PropTypes.shape({})
 	};
 
   constructor(props) {
@@ -181,10 +200,12 @@ LoginBehaviors enum seems to be diff from IOS so a mapping was done but there ar
 // android interpretation of loginBehaviors
 // these will map to the android sdk LoginBehavior enum
 FBLoginManager.LoginBehaviors = {
-   SystemAccount:"DEVICE_AUTH",
-   NativeOnly:"NATIVE_ONLY",
-   Native:"NATIVE_WITH_FALLBACK", // android default
-   Web:"WEB_ONLY"
+   SystemAccount: "DEVICE_AUTH",
+   NativeOnly: "NATIVE_ONLY",
+   Native: "NATIVE_WITH_FALLBACK", // android default
+   Web: "WEB_ONLY",
+   Katana: "KATANA_ONLY",
+   WebView: "WEB_VIEW_ONLY"
 }
 ```
 
@@ -193,8 +214,8 @@ A simple solution you may use is as follows:
 
 ```js
 //eg.
-var { Platform } = React;
-var {FBLoginManager} = require('react-native-facebook-login');
+import { Platform } from 'react-native';
+import {FBLoginManager} from 'react-native-facebook-login';
 var LoginBehavior = {
   'ios': FBLoginManager.LoginBehaviors.Browser,
   'android': FBLoginManager.LoginBehaviors.Native
@@ -221,7 +242,7 @@ Current Solution that works:
 We are excluding bolts from the FB SDK in order to avoid this collision
 
 ```gradle
-compile ('com.facebook.android:facebook-android-sdk:4.10.+'){
+compile ('com.facebook.android:facebook-android-sdk:4.16.+'){
         exclude group: 'com.parse.bolts', module: 'bolts-android';
         exclude group: 'com.parse.bolts', module: 'bolts-applinks';
         exclude group: 'com.parse.bolts', module: 'bolts-tasks';
@@ -231,3 +252,16 @@ compile ('com.facebook.android:facebook-android-sdk:4.10.+'){
 If this gives issues in the future, please report an issue.
 
 Thanks.
+
+### TroubleShooting
+
+**Receiving issues After an update? Please:**
+
+- Ensure this module is up to date
+- Clean your gradle build `cd android && ./gradlew clean && cd ..`
+- Ensure your `AndroidManifest.xml` and `strings.xml` are up to date
+- Double check setup guide on the [Facebook Documentation](https://developers.facebook.com/docs/facebook-login/android) for your sanity
+
+If you are still receiving issues after all this then open an issue.
+
+Thanks
